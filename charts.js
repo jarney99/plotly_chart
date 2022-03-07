@@ -13,7 +13,7 @@ function init() {
           .text(sample)
           .property("value", sample);
       });
-  
+
       // Use the first sample from the list to build the initial plots
       var firstSample = sampleNames[0];
       buildCharts(firstSample);
@@ -30,7 +30,6 @@ function init() {
     buildCharts(newSample);
     
   }
-  
   // Demographics Panel 
   function buildMetadata(sample) {
     d3.json("samples.json").then((data) => {
@@ -49,8 +48,7 @@ function init() {
       // tags for each key-value in the metadata.
       Object.entries(result).forEach(([key, value]) => {
         PANEL.append("h6").text(`${key.toUpperCase()}: ${value}`);
-      });
-  
+      });  
     });
   }
   
@@ -62,8 +60,10 @@ function init() {
       var samples = data.samples;
       // 4. Create a variable that filters the samples for the object with the desired sample number.
       var resultArray = samples.filter(sampleObj => sampleObj.id == sample);
+      var metadataArray = data.metadata.filter(sampleObj => sampleObj.id == sample);
       //  5. Create a variable that holds the first sample in the array.
       var result = resultArray[0];
+      var metadata = metadataArray[0];
   
       // 6. Create variables that hold the otu_ids, otu_labels, and sample_values.
       var otu_ids = results.otu_ids;
@@ -73,18 +73,18 @@ function init() {
       // 7. Create the yticks for the bar chart.
       // Hint: Get the the top 10 otu_ids and map them in descending order  
       //  so the otu_ids with the most bacteria are last. 
-  
-      var yticks = ids.map(sampleObj => "OTU " + sampleObj).slice(0,10).reverse();
+      var frequency = parseFloat(metadata.wfreq);
+      var yticks = otu_ids.slice(0,10).map(otuID => 'OTU ${otuID}').reverse();
   
       console.log(yticks)
   
       // 8. Create the trace for the bar chart. 
       var barData = [{
-        x: values,
         y: yticks,
+        x: sample_values.slice(0, 10).reverse(),
+        text: otu_labels.slice(0, 10).reverse(),
         type: "bar",
         orientation: "h",
-        text: labels 
       }];
       // 9. Create the layout for the bar chart. 
       var barLayout = {
@@ -96,14 +96,14 @@ function init() {
 
       // 1. Create the trace for the bubble chart.
     var bubbleData = [{
-        x: ids,
-        y: bubbleValues,
-        text: bubbleLabels,
+        x: otu_ids,
+        y: sample_Values,
+        text: otu_Labels,
         mode: "markers",
         marker: {
-        size: bubbleValues,
-        color: bubbleValues,
-        colorscale: "Portland" 
+          size: sample_values,
+          color: otu_ids,
+          colorscale: "Earth" 
      }
   }];
     // 2. Create the layout for the bubble chart.
@@ -112,7 +112,7 @@ function init() {
         xaxis: {title: "OTU ID"},
         automargin: true,
         hovermode: "closest"
-};
+  };
 
     // 3. Use Plotly to plot the data with the layout.
     Plotly.newPlot("bubble", bubbleData, bubbleLayout); 
